@@ -123,11 +123,11 @@ public class PublicacionServiceImpl implements PublicacionService {
 
 	// HU 2.4
 	public List<Publicacion> listarActivas() {
-		throw new UnsupportedOperationException("HU 2.4 pendiente de implementacion");
+		return publicacionRepository.findByEliminadaFalse();
 	}
 
 	public List<Publicacion> filtrar(Long propiedadId, Long ciudadId, EstadoPublicacion estadoPublicacion, BigDecimal precioMin, BigDecimal precioMax) {
-		throw new UnsupportedOperationException("HU 2.4 pendiente de implementacion");
+		return publicacionRepository.filtrarPublicaciones(propiedadId, ciudadId, estadoPublicacion, precioMin, precioMax);
 	}
 
 	public Publicacion buscarPorId(Long id) {
