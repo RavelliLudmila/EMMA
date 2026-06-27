@@ -60,7 +60,16 @@ public class PublicacionServiceImpl implements PublicacionService {
 	// HU 2.2
 	@Transactional
 	public void eliminar(Long id) {
-		throw new UnsupportedOperationException("HU 2.2 pendiente de implementacion");
+		Publicacion publicacion = buscarPorId(id);
+
+		// Solo se pueden eliminar publicaciones ACTIVAS
+		if (publicacion.getEstadoPublicacion() != EstadoPublicacion.ACTIVA) {
+			throw new ReglaNegocioException("Solo se pueden eliminar publicaciones en estado ACTIVA.");
+		}
+
+		// Baja logica
+		publicacion.setEliminada(true);
+		publicacionRepository.save(publicacion);
 	}
 
 	// HU 2.3
