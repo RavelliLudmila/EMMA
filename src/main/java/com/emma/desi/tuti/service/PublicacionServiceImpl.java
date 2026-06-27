@@ -1,6 +1,7 @@
 package com.emma.desi.tuti.service;
 
 import com.emma.desi.tuti.model.entity.Publicacion;
+import com.emma.desi.tuti.model.enums.EstadoDisponibilidad;
 import com.emma.desi.tuti.model.enums.EstadoPublicacion;
 import com.emma.desi.tuti.repository.PublicacionRepository;
 import com.emma.desi.tuti.repository.PropiedadRepository;
@@ -31,7 +32,7 @@ public class PublicacionServiceImpl implements PublicacionService {
 		}
 
 		// Validar que la propiedad este disponible
-		if (propiedad.getEstadoDisponibilidad() != com.emma.desi.tuti.model.enums.EstadoDisponibilidad.DISPONIBLE) {
+		if (propiedad.getEstadoDisponibilidad() != EstadoDisponibilidad.DISPONIBLE) {
 			throw new ReglaNegocioException("Solo se pueden publicar propiedades en estado DISPONIBLE.");
 		}
 
@@ -100,7 +101,7 @@ public class PublicacionServiceImpl implements PublicacionService {
 			if (estadoNuevo == EstadoPublicacion.ACTIVA) {
 				var propiedad = propiedadRepository.findById(existente.getPropiedad().getId())
 					.orElseThrow(() -> new ReglaNegocioException("La propiedad no existe."));
-				if (propiedad.getEstadoDisponibilidad() != com.emma.desi.tuti.model.enums.EstadoDisponibilidad.DISPONIBLE) {
+				if (propiedad.getEstadoDisponibilidad() != EstadoDisponibilidad.DISPONIBLE) {
 					throw new ReglaNegocioException("Solo se puede activar una publicacion si la propiedad esta en estado DISPONIBLE.");
 				}
 				if (publicacionRepository.existsByPropiedadIdAndEstadoPublicacionAndEliminadaFalse(
