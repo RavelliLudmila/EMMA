@@ -75,7 +75,50 @@ public class PublicacionServiceImpl implements PublicacionService {
 	// HU 2.3
 	@Transactional
 	public Publicacion actualizar(Long id, Publicacion publicacionModificada) {
-		throw new UnsupportedOperationException("HU 2.3 pendiente de implementacion");
+		Publicacion existente = buscarPorId(id);
+
+		// No se puede modificar una publicacion finalizada
+		if (existente.getEstadoPublicacion() == EstadoPublicacion.FINALIZADA) {
+			throw new ReglaNegocioException("No se puede modificar una publicacion finalizada.");
+		}
+
+		// Validar precio positivo
+		if (publicacionModificada.getPrecioMensual() == null || publicacionModificada.getPrecioMensual().compareTo(BigDecimal.ZERO) <= 0) {
+			throw new ReglaNegocioException("El precio mensual debe ser un numero positivo.");
+		}
+
+		EstadoPublicacion estadoNuevo = publicacionModificada.getEstadoPublicacion();
+		EstadoPublicacion estadoActual = existente.getEstadoPublicacion();
+
+		// Validar transicion de estado si cambia
+		if (estadoNuevo != estadoActual) {
+			// No se puede reactivar desde FINALIZADA (ya bloqueado arriba, pero lo dejamos explicito)
+			if (estadoActual == EstadoPublicacion.FINALIZADA) {
+				throw new ReglaNegocioException("No se puede cambiar el estado de una publicacion finalizada.");
+			}
+			// Para activar desde PAUSADA: verificar propiedad disponible y sin otra publicacion activa
+			if (estadoNuevo == EstadoPublicacion.ACTIVA) {
+				var propiedad = propiedadRepository.findById(existente.getPropiedad().getId())
+					.orElseThrow(() -> new ReglaNegocioException("La propiedad no existe."));
+				if (propiedad.getEstadoDisponibilidad() != com.emma.desi.tuti.model.enums.EstadoDisponibilidad.DISPONIBLE) {
+					throw new ReglaNegocioException("Solo se puede activar una publicacion si la propiedad esta en estado DISPONIBLE.");
+				}
+				if (publicacionRepository.existsByPropiedadIdAndEstadoPublicacionAndEliminadaFalse(
+						existente.getPropiedad().getId(), EstadoPublicacion.ACTIVA)) {
+					throw new ReglaNegocioException("Ya existe una publicacion activa para esta propiedad.");
+				}
+			}
+			// Registrar cambio de estado en historial
+			existente.cambiarEstado(estadoNuevo);
+		}
+
+		// Actualizar campos (propiedad es de solo lectura, no se modifica)
+		existente.setPrecioMensual(publicacionModificada.getPrecioMensual());
+		existente.setCondiciones(publicacionModificada.getCondiciones());
+		existente.setDescripcion(publicacionModificada.getDescripcion());
+		existente.setFechaPublicacion(publicacionModificada.getFechaPublicacion());
+
+		return publicacionRepository.save(existente);
 	}
 
 	// HU 2.4
