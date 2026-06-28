@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.List;
 
 @Service
@@ -51,6 +52,9 @@ public class PublicacionServiceImpl implements PublicacionService {
 		if (publicacion.getEstadoPublicacion() == null) {
 			publicacion.setEstadoPublicacion(EstadoPublicacion.ACTIVA);
 		}
+
+		// Asignar la fecha de publicacion automaticamente
+		publicacion.setFechaPublicacion(LocalDate.now());
 
 		// Registrar en historial de estados
 		publicacion.cambiarEstado(publicacion.getEstadoPublicacion());
@@ -113,11 +117,10 @@ public class PublicacionServiceImpl implements PublicacionService {
 			existente.cambiarEstado(estadoNuevo);
 		}
 
-		// Actualizar campos (propiedad es de solo lectura, no se modifica)
+		// Actualizar campos (propiedad y fechaPublicacion son de solo lectura, no se modifican)
 		existente.setPrecioMensual(publicacionModificada.getPrecioMensual());
 		existente.setCondiciones(publicacionModificada.getCondiciones());
 		existente.setDescripcion(publicacionModificada.getDescripcion());
-		existente.setFechaPublicacion(publicacionModificada.getFechaPublicacion());
 
 		return publicacionRepository.save(existente);
 	}

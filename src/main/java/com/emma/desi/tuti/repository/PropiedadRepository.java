@@ -12,11 +12,12 @@ public interface PropiedadRepository extends JpaRepository<Propiedad,Long> {
 	
 	List<Propiedad> findByEliminadaFalse(); //Lsitamos las propiedades que no estan "eliminadas"
 	
-	boolean existDireccion(String direccion, Long idCiudad); //Chequeamos quie no exista una propiedad con la misma direccion
+	@Query("SELECT COUNT(p) > 0 FROM Propiedad p WHERE p.direccion = :direccion AND p.city.id = :ciudadId AND p.eliminada = false")
+	boolean existDireccion(@Param("direccion") String direccion, @Param("ciudadId") Long ciudadId); //Chequeamos quie no exista una propiedad con la misma direccion
 	
 	@Query("SELECT p FROM Propiedad p WHERE p.eliminada = false " +
 	           "AND (:direccion IS NULL OR p.direccion LIKE %:direccion%) " +
-	           "AND (:ciudadId IS NULL OR p.ciudad.id = :ciudadId) " +
+	           "AND (:ciudadId IS NULL OR p.city.id = :ciudadId) " +
 	           "AND (:tipo IS NULL OR p.tipo = :tipo) " +
 	           "AND (:estado IS NULL OR p.estadoDisponibilidad = :estado)")
 	    List<Propiedad> filtrarPropiedades(

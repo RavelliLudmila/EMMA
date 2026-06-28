@@ -1,76 +1,77 @@
-<!DOCTYPE html>
+<!doctype html>
 <html xmlns:th="http://www.thymeleaf.org">
-<head>
-    <meta charset="UTF-8">
-    <title th:text="${publicacion.id == null} ? 'Nueva Publicacion' : 'Editar Publicacion'">Publicacion</title>
-</head>
-<body>
+    <head>
+        <meta charset="UTF-8" />
+        <title th:text="${publicacion.id == null} ? 'Nueva Publicacion' : 'Editar Publicacion'">Publicacion</title>
+    </head>
+    <body>
+        <h1 th:text="${publicacion.id == null} ? 'Nueva Publicacion' : 'Editar Publicacion'">Publicacion</h1>
 
-<h1 th:text="${publicacion.id == null} ? 'Nueva Publicacion' : 'Editar Publicacion'">Publicacion</h1>
+        <div th:if="${error}" th:text="${error}" style="color: red"></div>
 
-<div th:if="${error}" th:text="${error}" style="color:red;"></div>
+        <form
+            th:action="${publicacion.id == null} ? @{/publicaciones/guardar} : @{/publicaciones/actualizar/{id}(id=${publicacion.id})}"
+            method="post"
+            th:object="${publicacion}"
+        >
+            <!-- ID (solo lectura en edicion) -->
+            <div th:if="${publicacion.id != null}">
+                <label>ID: <span th:text="${publicacion.id}"></span></label>
+                <input type="hidden" th:field="*{id}" />
+            </div>
 
-<form th:action="${publicacion.id == null} ? @{/publicaciones/guardar} : @{/publicaciones/actualizar/{id}(id=${publicacion.id})}"
-      method="post" th:object="${publicacion}">
+            <!-- Propiedad: seleccionable solo en alta (HU 2.3: de solo lectura una vez creada) -->
+            <div th:if="${publicacion.id == null}">
+                <label
+                    >Propiedad:
+                    <select name="propiedad.id" required>
+                        <option value="">-- Seleccionar propiedad --</option>
+                        <option th:each="p : ${propiedades}" th:value="${p.id}" th:text="${p.direccion + ' - ' + p.ciudad.nombre}"></option>
+                    </select>
+                </label>
+            </div>
+            <div th:if="${publicacion.id != null}">
+                <label>Propiedad: <span th:text="${publicacion.propiedad.direccion + ' - ' + publicacion.propiedad.ciudad.nombre}"></span></label>
+            </div>
 
-    <!-- ID (solo lectura en edicion) -->
-    <div th:if="${publicacion.id != null}">
-        <label>ID: <span th:text="${publicacion.id}"></span></label>
-        <input type="hidden" th:field="*{id}"/>
-    </div>
+            <div>
+                <label
+                    >Precio mensual:
+                    <input type="number" th:field="*{precioMensual}" step="0.01" min="0.01" required />
+                </label>
+            </div>
 
-    <!-- Propiedad: seleccionable solo en alta (HU 2.3: de solo lectura una vez creada) -->
-    <div th:if="${publicacion.id == null}">
-        <label>Propiedad:
-            <select name="propiedad.id" required>
-                <option value="">-- Seleccionar propiedad --</option>
-                <option th:each="p : ${propiedades}"
-                        th:value="${p.id}"
-                        th:text="${p.direccion + ' - ' + p.ciudad.nombre}"></option>
-            </select>
-        </label>
-    </div>
-    <div th:if="${publicacion.id != null}">
-        <label>Propiedad: <span th:text="${publicacion.propiedad.direccion + ' - ' + publicacion.propiedad.ciudad.nombre}"></span></label>
-    </div>
+            <div>
+                <label
+                    >Condiciones:<br />
+                    <textarea th:field="*{condiciones}" rows="4" cols="60" required></textarea>
+                </label>
+            </div>
 
-    <div>
-        <label>Precio mensual:
-            <input type="number" th:field="*{precioMensual}" step="0.01" min="0.01" required/>
-        </label>
-    </div>
+            <div>
+                <label
+                    >Descripcion:<br />
+                    <textarea th:field="*{descripcion}" rows="4" cols="60" required></textarea>
+                </label>
+            </div>
 
-    <div>
-        <label>Condiciones:<br/>
-            <textarea th:field="*{condiciones}" rows="4" cols="60" required></textarea>
-        </label>
-    </div>
+            <!-- Fecha de publicacion: solo lectura en edicion, no se muestra en alta (se asigna automaticamente) -->
+            <div th:if="${publicacion.id != null}">
+                <label>Fecha de publicacion: <span th:text="${publicacion.fechaPublicacion}"></span></label>
+            </div>
 
-    <div>
-        <label>Descripcion:<br/>
-            <textarea th:field="*{descripcion}" rows="4" cols="60" required></textarea>
-        </label>
-    </div>
+            <div>
+                <label
+                    >Estado:
+                    <select th:field="*{estadoPublicacion}" required>
+                        <option th:each="e : ${estados}" th:value="${e}" th:text="${e}"></option>
+                    </select>
+                </label>
+            </div>
 
-    <div>
-        <label>Fecha de publicacion:
-            <input type="date" th:field="*{fechaPublicacion}" required/>
-        </label>
-    </div>
-
-    <div>
-        <label>Estado:
-            <select th:field="*{estadoPublicacion}" required>
-                <option th:each="e : ${estados}" th:value="${e}" th:text="${e}"></option>
-            </select>
-        </label>
-    </div>
-
-    <br/>
-    <button type="submit" th:text="${publicacion.id == null} ? 'Crear' : 'Guardar cambios'">Guardar</button>
-    <a th:href="@{/publicaciones}">Cancelar</a>
-
-</form>
-
-</body>
+            <br />
+            <button type="submit" th:text="${publicacion.id == null} ? 'Crear' : 'Guardar cambios'">Guardar</button>
+            <a th:href="@{/publicaciones}">Cancelar</a>
+        </form>
+    </body>
 </html>
