@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Alta de Contrato</title>
+    <link rel="stylesheet" th:href="static/app.css">
+</head>
+<body>
+<main class="shell">
+    <section class="page-header">
+        <div>
+            
+            <h1 th:text="${titulo}">Alta de Contrato</h1>
+        </div>
+        
+    </section>
+
+    <div class="alert success" th:if="${mensajeExito}" th:text="${mensajeExito}"></div>
+
+    <form class="form-grid" th:action="/contratos" th:object="$altaContratoDTO" method="post" novalidate>
+        <div class="alert error" th:if="${#fields.hasGlobalErrors()}">
+            <p th:each="error : ${#fields.globalErrors()}" th:text="${error}"></p>
+        </div>
+
+        <label>
+            <span>Propiedad</span>
+            <select th:field="*{propiedadId}" required>
+                <option value="">Seleccionar propiedad</option>
+                <option th:each="propiedad : ${propiedades}"
+                        th:value="${propiedad.id}"
+                        th:text="${propiedad.descripcionListado}">
+                </option>
+            </select>
+            <small class="field-error" th:if="${#fields.hasErrors('propiedadId')}" th:errors="*{propiedadId}"></small>
+        </label>
+
+        <label>
+            <span>Inquilino</span>
+            <select th:field="*{inquilinoId}" required>
+                <option value="">Seleccionar inquilino</option>
+                <option th:each="inquilino : ${inquilinos}"
+                        th:value="${inquilino.id}"
+                        th:text="${inquilino.nombreCompleto + ' - DNI ' + inquilino.documento}">
+                </option>
+            </select>
+            <small class="field-error" th:if="${#fields.hasErrors('inquilinoId')}" th:errors="*{inquilinoId}"></small>
+        </label>
+
+        <label>
+            <span>Fecha de inicio</span>
+            <input type="date" th:field="*{fechaInicio}" required>
+            <small class="field-error" th:if="${#fields.hasErrors('fechaInicio')}" th:errors="*{fechaInicio}"></small>
+        </label>
+
+        <label>
+            <span>Duracion en meses</span>
+            <input type="number" th:field="*{duracionMeses}" min="1" step="1" required>
+            <small class="field-error" th:if="${#fields.hasErrors('duracionMeses')}" th:errors="*{duracionMeses}"></small>
+        </label>
+
+        <label>
+            <span>Importe mensual</span>
+            <input type="number" th:field="*{importeMensual}" min="0.01" step="0.01" required>
+            <small class="field-error" th:if="${#fields.hasErrors('importeMensual')}" th:errors="*{importeMensual}"></small>
+        </label>
+
+        <label>
+            <span>Dia de vencimiento mensual</span>
+            <input type="number" th:field="*{diaVencimientoMensual}" min="1" max="31" step="1" required>
+            <small class="field-error" th:if="${#fields.hasErrors('diaVencimientoMensual')}" th:errors="*{diaVencimientoMensual}"></small>
+        </label>
+
+        <label>
+            <span>Estado del contrato</span>
+            <select th:field="*{estado}" required>
+                <option value="">Seleccionar estado</option>
+                <option th:each="estado : ${estadosContrato}"
+                        th:value="${estado}"
+                        th:text="${estado.descripcion}">
+                </option>
+            </select>
+            <small class="field-error" th:if="${#fields.hasErrors('estado')}" th:errors="*{estado}"></small>
+        </label>
+
+        <label class="wide">
+            <span>Descripcion</span>
+            <textarea th:field="*{descripcion}" rows="5" maxlength="1000" required></textarea>
+            <small class="field-error" th:if="${#fields.hasErrors('descripcion')}" th:errors="*{descripcion}"></small>
+        </label>
+
+        <div class="actions wide">
+            <button type="reset" class="secondary">Limpiar</button>
+            <button type="submit">Guardar contrato</button>
+        </div>
+    </form>
+</main>
+</body>
+</html>
