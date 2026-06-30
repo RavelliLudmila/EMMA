@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Alta de Contrato</title>
-    <link rel="stylesheet" th:href="static/app.css">
+    
 </head>
 <body>
 <main class="shell">
@@ -16,7 +16,7 @@
         
     </section>
 
-    <div class="alert success" th:if="${mensajeExito}" th:text="${mensajeExito}"></div>
+    <div class="alert success" th:if="${mensajeExito}" th:text="${mensajeExito}">ALTA DE CONTRATO EXITOSA</div>
 
     <form class="form-grid" th:action="/contratos" th:object="$altaContratoDTO" method="post" novalidate>
         <div class="alert error" th:if="${#fields.hasGlobalErrors()}">
