@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Publicaciones - Inmobiliaria</title>
+    <link rel="stylesheet" th:href="@{/css/estilos.css}"/>
+</head>
+<body>
+
+<nav class="navbar">
+    <div class="navbar-brand"><span>🏠 Inmobiliaria</span></div>
+    <ul class="navbar-menu">
+        <li><a th:href="@{/propiedades}">Propiedades</a></li>
+        <li><a th:href="@{/publicaciones}" class="active">Publicaciones</a></li>
+        <li><a th:href="@{/contratos}">Contratos</a></li>
+        <li><a th:href="@{/facturas}">Facturas</a></li>
+    </ul>
+</nav>
+
+<main class="container">
+
+    <div class="page-header">
+        <h1>Publicaciones</h1>
+        <a th:href="@{/publicaciones/nueva}" class="btn btn-primary">+ Nueva Publicacion</a>
+    </div>
+
+    <div th:if="${mensajeExito}" class="alerta alerta-exito" th:text="${mensajeExito}"></div>
+    <div th:if="${mensajeError}" class="alerta alerta-error" th:text="${mensajeError}"></div>
+
+    <!-- Filtros -->
+    <div class="card filtros">
+        <h3>Filtrar</h3>
+        <form th:action="@{/publicaciones}" method="get" class="form-filtros">
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Propiedad</label>
+                    <select name="propiedadId" class="form-control">
+                        <option value="">Todas</option>
+                        <option th:each="p : ${propiedades}"
+                                th:value="${p.id}"
+                                th:text="${p.resumen}"
+                                th:selected="${propiedadIdFiltro != null and propiedadIdFiltro == p.id}">
+                        </option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Ciudad</label>
+                    <select name="ciudadId" class="form-control">
+                        <option value="">Todas</option>
+                        <option th:each="c : ${ciudades}"
+                                th:value="${c.id}"
+                                th:text="${c.nombreCompleto}"
+                                th:selected="${ciudadIdFiltro != null and ciudadIdFiltro == c.id}">
+                        </option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Estado</label>
+                    <select name="estadoPublicacion" class="form-control">
+                        <option value="">Todos</option>
+                        <option th:each="e : ${estados}"
+                                th:value="${e.name()}"
+                                th:text="${e.descripcion}"
+                                th:selected="${estadoFiltro != null and estadoFiltro == e}">
+                        </option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Precio min</label>
+                    <input type="number" name="precioMin" class="form-control"
+                           th:value="${precioMinFiltro}" step="0.01" min="0"/>
+                </div>
+
+                <div class="form-group">
+                    <label>Precio max</label>
+                    <input type="number" name="precioMax" class="form-control"
+                           th:value="${precioMaxFiltro}" step="0.01" min="0"/>
+                </div>
+
+                <div class="form-group form-group-actions">
+                    <button type="submit" class="btn btn-secondary">Filtrar</button>
+                    <a th:href="@{/publicaciones}" class="btn btn-outline">Limpiar</a>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <!-- Tabla -->
+    <div class="card">
+        <table class="tabla" th:if="${not #lists.isEmpty(publicaciones)}">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Direccion</th>
+                    <th>Ciudad</th>
+                    <th>Precio mensual</th>
+                    <th>Fecha publicacion</th>
+                    <th>Estado</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="p : ${publicaciones}">
+                    <td th:text="${p.id}"></td>
+                    <td th:text="${p.propiedad.direccion}"></td>
+                    <td th:text="${p.propiedad.ciudad != null ? p.propiedad.ciudad.nombre : ''}"></td>
+                    <td th:text="${'$' + #numbers.formatDecimal(p.precioMensual, 1, 'COMMA', 2, 'POINT')}"></td>
+                    <td th:text="${#temporals.format(p.fechaPublicacion, 'dd/MM/yyyy')}"></td>
+                    <td>
+                        <span class="badge"
+                              th:classappend="${p.estadoPublicacion.name().toLowerCase()}"
+                              th:text="${p.estadoPublicacion.descripcion}">
+                        </span>
+                    </td>
+                    <td class="acciones">
+                        <a th:href="@{/publicaciones/{id}/editar(id=${p.id})}"
+                           th:if="${p.estadoPublicacion.name() != 'FINALIZADA'}"
+                           class="btn btn-sm btn-secondary">Editar</a>
+                        <form th:action="@{/publicaciones/{id}/eliminar(id=${p.id})}"
+                              method="post" style="display:inline"
+                              onsubmit="return confirm('¿Eliminar esta publicacion?')">
+                            <button type="submit"
+                                    th:if="${p.estadoPublicacion.name() == 'ACTIVA'}"
+                                    class="btn btn-sm btn-danger">Eliminar</button>
+                        </form>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div th:if="${#lists.isEmpty(publicaciones)}" class="sin-resultados">
+            <p>No se encontraron publicaciones.</p>
+        </div>
+    </div>
+
+</main>
+
+<footer class="footer">
+    <p>Sistema de Gestion Inmobiliaria &mdash; DESI 2026 &mdash; UTN FRSF</p>
+</footer>
+
+</body>
+</html>

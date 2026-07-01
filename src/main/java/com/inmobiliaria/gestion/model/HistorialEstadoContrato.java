@@ -12,23 +12,22 @@ public class HistorialEstadoContrato {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "contrato_id", nullable = false)
     private Contrato contrato;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    @Column(nullable = false, length = 30)
     private EstadoContrato estado;
 
     @Column(nullable = false)
-    private LocalDateTime fechaHora;
+    private LocalDateTime fechaCambio;
 
-    public HistorialEstadoContrato() {}
-
-    public HistorialEstadoContrato(Contrato contrato, EstadoContrato estado) {
-        this.contrato = contrato;
-        this.estado = estado;
-        this.fechaHora = LocalDateTime.now();
+    @PrePersist
+    void prePersist() {
+        if (fechaCambio == null) {
+            fechaCambio = LocalDateTime.now();
+        }
     }
 
     public Long getId() { return id; }
@@ -40,6 +39,6 @@ public class HistorialEstadoContrato {
     public EstadoContrato getEstado() { return estado; }
     public void setEstado(EstadoContrato estado) { this.estado = estado; }
 
-    public LocalDateTime getFechaHora() { return fechaHora; }
-    public void setFechaHora(LocalDateTime fechaHora) { this.fechaHora = fechaHora; }
+    public LocalDateTime getFechaCambio() { return fechaCambio; }
+    public void setFechaCambio(LocalDateTime fechaCambio) { this.fechaCambio = fechaCambio; }
 }

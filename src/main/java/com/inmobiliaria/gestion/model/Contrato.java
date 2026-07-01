@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -16,11 +17,11 @@ public class Contrato {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "propiedad_id", nullable = false)
     private Propiedad propiedad;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "inquilino_id", nullable = false)
     private Persona inquilino;
 
@@ -28,38 +29,57 @@ public class Contrato {
     @Column(nullable = false)
     private LocalDate fechaInicio;
 
-    @NotNull(message = "La duración en meses es requerida")
-    @Positive(message = "La duración debe ser un número positivo")
+    @NotNull(message = "La duracion en meses es requerida")
+    @Positive(message = "La duracion en meses debe ser un numero positivo")
     @Column(nullable = false)
     private Integer duracionMeses;
 
     @NotNull(message = "El importe mensual es requerido")
-    @DecimalMin(value = "0.01", message = "El importe mensual debe ser un número positivo")
+    @DecimalMin(value = "0.01", message = "El importe mensual debe ser un numero positivo")
     @Column(nullable = false, precision = 12, scale = 2)
     private BigDecimal importeMensual;
 
-    @NotNull(message = "El día de vencimiento es requerido")
-    @Min(value = 1, message = "El día de vencimiento debe ser entre 1 y 31")
-    @Max(value = 31, message = "El día de vencimiento debe ser entre 1 y 31")
+    @NotNull(message = "El dia de vencimiento es requerido")
+    @Min(value = 1, message = "El dia de vencimiento debe estar entre 1 y 31")
+    @Max(value = 31, message = "El dia de vencimiento debe estar entre 1 y 31")
     @Column(nullable = false)
     private Integer diaVencimientoMensual;
 
-    @Column(columnDefinition = "TEXT")
+    @NotBlank(message = "La descripcion es requerida")
+    @Column(nullable = false, length = 1000)
     private String descripcion;
 
-    @NotNull
+    @NotNull(message = "El estado es requerido")
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    @Column(nullable = false, length = 30)
     private EstadoContrato estado = EstadoContrato.BORRADOR;
 
     @Column(nullable = false)
     private boolean eliminado = false;
 
-    @OneToMany(mappedBy = "contrato", cascade = CascadeType.ALL)
+    @Column(nullable = false, updatable = false)
+    private LocalDateTime creadoEn;
+
+    @Column(nullable = false)
+    private LocalDateTime actualizadoEn;
+
+    @Column
+    private LocalDateTime fechaEliminacion;
+
+    @OneToMany(mappedBy = "contrato", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<HistorialEstadoContrato> historialEstados = new ArrayList<>();
 
-    // Constructors
-    public Contrato() {}
+    @PrePersist
+    void prePersist() {
+        LocalDateTime ahora = LocalDateTime.now();
+        creadoEn = ahora;
+        actualizadoEn = ahora;
+    }
+
+    @PreUpdate
+    void preUpdate() {
+        actualizadoEn = LocalDateTime.now();
+    }
 
     // Getters & Setters
     public Long getId() { return id; }
@@ -92,12 +112,19 @@ public class Contrato {
     public boolean isEliminado() { return eliminado; }
     public void setEliminado(boolean eliminado) { this.eliminado = eliminado; }
 
+    public LocalDateTime getCreadoEn() { return creadoEn; }
+    public LocalDateTime getActualizadoEn() { return actualizadoEn; }
+
+    public LocalDateTime getFechaEliminacion() { return fechaEliminacion; }
+    public void setFechaEliminacion(LocalDateTime fechaEliminacion) { this.fechaEliminacion = fechaEliminacion; }
+
     public List<HistorialEstadoContrato> getHistorialEstados() { return historialEstados; }
-    public void setHistorialEstados(List<HistorialEstadoContrato> historialEstados) { this.historialEstados = historialEstados; }
+    public void setHistorialEstados(List<HistorialEstadoContrato> h) { this.historialEstados = h; }
 
     public String getResumen() {
         if (propiedad != null && inquilino != null) {
-            return "Contrato #" + id + " - " + propiedad.getResumen() + " / " + inquilino.getNombreCompleto();
+            return "Contrato #" + id + " - " + propiedad.getResumen()
+                    + " / " + inquilino.getNombreCompleto();
         }
         return "Contrato #" + id;
     }

@@ -292,3 +292,12 @@ footer.footer {
     margin-bottom: 1rem;
     font-weight: 700;
 }
+
+.badge.activa     { background: #d1e7dd; color: #0a3622; }
+.badge.pausada    { background: #fef3cd; color: #856404; }
+.badge.finalizada { background: var(--gray-200); color: var(--gray-500); }
+
+.badge.borrador   { background: #e2e3e5; color: #383d41; }
+.badge.activo     { background: #d1e7dd; color: #0a3622; }
+.badge.finalizado { background: #cff4fc; color: #055160; }
+.badge.rescindido { background: #f8d7da; color: #58151c; }
