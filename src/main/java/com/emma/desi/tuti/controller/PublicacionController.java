@@ -6,7 +6,6 @@ import com.emma.desi.tuti.repository.CiudadRepository;
 import com.emma.desi.tuti.service.PropiedadService;
 import com.emma.desi.tuti.service.PublicacionService;
 import com.emma.desi.tuti.service.exception.ReglaNegocioException;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -17,14 +16,17 @@ import java.math.BigDecimal;
 @RequestMapping("/publicaciones")
 public class PublicacionController {
 
-	@Autowired
-	private PublicacionService publicacionService;
+	private final PublicacionService publicacionService;
 
-	@Autowired
-	private PropiedadService propiedadService;
+	private final PropiedadService propiedadService;
 
-	@Autowired
-	private CiudadRepository ciudadRepository;
+	private final CiudadRepository ciudadRepository;
+
+	PublicacionController(PublicacionService publicacionService, PropiedadService propiedadService, CiudadRepository ciudadRepository) {
+		this.publicacionService = publicacionService;
+		this.propiedadService = propiedadService;
+		this.ciudadRepository = ciudadRepository;
+	}
 
 	// HU 2.4 — Listado con filtros opcionales
 	@GetMapping

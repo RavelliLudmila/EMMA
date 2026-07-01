@@ -4,7 +4,6 @@ import com.emma.desi.tuti.model.entity.Propiedad;
 import com.emma.desi.tuti.model.enums.*;
 import com.emma.desi.tuti.repository.PropiedadRepository;
 import com.emma.desi.tuti.service.exception.*;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
@@ -12,8 +11,11 @@ import java.util.List;
 @Service
 public class PropiedadServiceImpl implements PropiedadService {
 	
-	@Autowired
-	private PropiedadRepository propiedadRepository;
+	private final PropiedadRepository propiedadRepository;
+
+    PropiedadServiceImpl(PropiedadRepository propiedadRepository) {
+        this.propiedadRepository = propiedadRepository;
+    }
 	
 	//Acá iría la verificacion de si hay un contrato. Hardcodeo un false hasta que tenga el service de la epic.
 	
