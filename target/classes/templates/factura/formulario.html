@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title th:text="${accion == 'alta' ? 'Nueva Factura' : 'Editar Factura'} + ' - Inmobiliaria'">Factura</title>
+    <link rel="stylesheet" th:href="@{/css/estilos.css}"/>
+</head>
+<body>
+
+<nav class="navbar">
+    <div class="navbar-brand"><span>🏠 Inmobiliaria</span></div>
+    <ul class="navbar-menu">
+        <li><a th:href="@{/propiedades}">Propiedades</a></li>
+        <li><a th:href="@{/publicaciones}">Publicaciones</a></li>
+        <li><a th:href="@{/contratos}">Contratos</a></li>
+        <li><a th:href="@{/facturas}" class="active">Facturas</a></li>
+    </ul>
+</nav>
+
+<main class="container">
+
+    <div class="page-header">
+        <h1 th:text="${accion == 'alta' ? 'Nueva Factura' : 'Editar Factura #' + factura.id}">Factura</h1>
+        <a th:href="@{/facturas}" class="btn btn-outline">← Volver al listado</a>
+    </div>
+
+    <!-- Mensajes de feedback -->
+    <div th:if="${mensajeExito}" class="alerta alerta-exito" th:text="${mensajeExito}"></div>
+    <div th:if="${mensajeError}" class="alerta alerta-error" th:text="${mensajeError}"></div>
+
+    <div class="card">
+        <form th:action="${accion == 'alta' ? '/facturas/nueva' : '/facturas/' + factura.id + '/editar'}"
+              method="post">
+
+            <!-- ID (solo lectura en edición) -->
+            <div class="form-group" th:if="${accion == 'edicion'}">
+                <label>ID Factura</label>
+                <input type="text" class="form-control" th:value="${factura.id}" readonly/>
+            </div>
+
+            <!-- Contrato (solo lectura en edición, seleccionable en alta) -->
+            <div class="form-group" th:if="${accion == 'alta'}">
+                <label for="contratoId">Contrato <span class="requerido">*</span></label>
+                <select id="contratoId" name="contratoId" class="form-control" required>
+                    <option value="">-- Seleccione un contrato activo --</option>
+                    <option th:each="c : ${contratos}"
+                            th:value="${c.id}"
+                            th:text="${c.resumen}">
+                    </option>
+                </select>
+            </div>
+
+            <div class="form-group" th:if="${accion == 'edicion'}">
+                <label>Contrato</label>
+                <input type="text" class="form-control"
+                       th:value="${factura.contrato.resumen}" readonly/>
+            </div>
+
+            <!-- Concepto -->
+            <div class="form-group">
+                <label for="conceptoFacturado">Concepto facturado <span class="requerido">*</span></label>
+                <input type="text" id="conceptoFacturado" name="conceptoFacturado"
+                       class="form-control"
+                       th:value="${factura.conceptoFacturado}"
+                       placeholder="Ej: Alquiler mes de julio, expensas, etc."
+                       required/>
+            </div>
+
+            <!-- Fechas -->
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="fechaEmision">Fecha de emisión <span class="requerido">*</span></label>
+                    <input type="date" id="fechaEmision" name="fechaEmision"
+                           class="form-control"
+                           th:value="${factura.fechaEmision}"
+                           required/>
+                </div>
+
+                <div class="form-group">
+                    <label for="fechaVencimiento">Fecha de vencimiento <span class="requerido">*</span></label>
+                    <input type="date" id="fechaVencimiento" name="fechaVencimiento"
+                           class="form-control"
+                           th:value="${factura.fechaVencimiento}"
+                           required/>
+                </div>
+            </div>
+
+            <!-- Importe -->
+            <div class="form-group">
+                <label for="importe">Importe <span class="requerido">*</span></label>
+                <input type="number" id="importe" name="importe"
+                       class="form-control"
+                       th:value="${factura.importe}"
+                       step="0.01" min="0.01"
+                       required/>
+            </div>
+
+            <!-- Estado (solo en edición) -->
+            <div class="form-group" th:if="${accion == 'edicion'}">
+                <label for="estado">Estado <span class="requerido">*</span></label>
+                <select id="estado" name="estado" class="form-control" required
+                        onchange="mostrarDatosPago(this.value)">
+                    <option th:each="e : ${estados}"
+                            th:value="${e.name()}"
+                            th:text="${e.descripcion}"
+                            th:selected="${factura.estado == e}">
+                    </option>
+                </select>
+                <small class="form-hint">
+                    Transiciones permitidas: Pendiente → Pagada / Vencida / Anulada &nbsp;|&nbsp; Vencida → Pagada
+                </small>
+            </div>
+
+            <!-- Datos de pago (visibles solo cuando estado = PAGADA) -->
+            <div id="seccionPago" class="seccion-pago"
+                 th:classappend="${factura.estado != null and factura.estado.name() == 'PAGADA'} ? 'visible' : ''">
+                <h3 class="seccion-titulo">Datos del pago</h3>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="fechaPago">Fecha de pago</label>
+                        <input type="date" id="fechaPago" name="fechaPago"
+                               class="form-control"
+                               th:value="${factura.fechaPago}"/>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="medioPago">Medio de pago</label>
+                        <select id="medioPago" name="medioPago" class="form-control">
+                            <option value="">-- Seleccione --</option>
+                            <option th:each="m : ${mediosPago}"
+                                    th:value="${m.name()}"
+                                    th:text="${m.descripcion}"
+                                    th:selected="${factura.medioPago == m}">
+                            </option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="importePagado">Importe pagado</label>
+                        <input type="number" id="importePagado" name="importePagado"
+                               class="form-control"
+                               th:value="${factura.importePagado}"
+                               step="0.01" min="0.01"/>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="interes">Interés (opcional)</label>
+                        <input type="number" id="interes" name="interes"
+                               class="form-control"
+                               th:value="${factura.interes}"
+                               step="0.01" min="0"/>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Botones -->
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary">
+                    <span th:text="${accion == 'alta' ? 'Crear Factura' : 'Guardar Cambios'}">Guardar</span>
+                </button>
+                <a th:href="@{/facturas}" class="btn btn-outline">Cancelar</a>
+            </div>
+        </form>
+    </div>
+</main>
+
+<footer class="footer">
+    <p>Sistema de Gestión Inmobiliaria &mdash; DESI 2026 &mdash; UTN FRSF</p>
+</footer>
+
+<script>
+function mostrarDatosPago(estado) {
+    const seccion = document.getElementById('seccionPago');
+    if (estado === 'PAGADA') {
+        seccion.classList.add('visible');
+    } else {
+        seccion.classList.remove('visible');
+    }
+}
+
+// Ejecutar al cargar si ya está en PAGADA
+document.addEventListener('DOMContentLoaded', function() {
+    const selectEstado = document.getElementById('estado');
+    if (selectEstado) {
+        mostrarDatosPago(selectEstado.value);
+    }
+});
+</script>
+
+</body>
+</html>

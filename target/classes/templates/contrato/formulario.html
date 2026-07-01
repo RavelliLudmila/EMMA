@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title th:text="${accion == 'alta' ? 'Nuevo Contrato' : 'Editar Contrato'} + ' - Inmobiliaria'">Contrato</title>
+    <link rel="stylesheet" th:href="@{/css/estilos.css}"/>
+</head>
+<body>
+
+<nav class="navbar">
+    <div class="navbar-brand"><span>🏠 Inmobiliaria</span></div>
+    <ul class="navbar-menu">
+        <li><a th:href="@{/propiedades}">Propiedades</a></li>
+        <li><a th:href="@{/publicaciones}">Publicaciones</a></li>
+        <li><a th:href="@{/contratos}" class="active">Contratos</a></li>
+        <li><a th:href="@{/facturas}">Facturas</a></li>
+    </ul>
+</nav>
+
+<main class="container">
+
+    <div class="page-header">
+        <h1 th:text="${accion == 'alta' ? 'Nuevo Contrato' : 'Editar Contrato #' + contrato.id}">Contrato</h1>
+        <a th:href="@{/contratos}" class="btn btn-outline">← Volver al listado</a>
+    </div>
+
+    <div th:if="${mensajeExito}" class="alerta alerta-exito" th:text="${mensajeExito}"></div>
+    <div th:if="${mensajeError}" class="alerta alerta-error" th:text="${mensajeError}"></div>
+
+    <div class="card">
+        <form th:action="${accion == 'alta' ? '/contratos/nuevo' : '/contratos/' + contrato.id + '/editar'}"
+              method="post">
+
+            <!-- ID solo lectura en edicion -->
+            <div class="form-group" th:if="${accion == 'edicion'}">
+                <label>ID Contrato</label>
+                <input type="text" class="form-control" th:value="${contrato.id}" readonly/>
+            </div>
+
+            <!-- Propiedad -->
+            <div class="form-group">
+                <label for="propiedadId">Propiedad <span class="requerido">*</span></label>
+                <select id="propiedadId" name="propiedadId" class="form-control" required>
+                    <option value="">-- Seleccione una propiedad --</option>
+                    <option th:each="p : ${propiedades}"
+                            th:value="${p.id}"
+                            th:text="${p.resumen + ' (' + p.estadoDisponibilidad.name() + ')'}"
+                            th:selected="${contrato.propiedad != null and contrato.propiedad.id == p.id}">
+                    </option>
+                </select>
+            </div>
+
+            <!-- Inquilino -->
+            <div class="form-group">
+                <label for="inquilinoId">Inquilino <span class="requerido">*</span></label>
+                <select id="inquilinoId" name="inquilinoId" class="form-control" required>
+                    <option value="">-- Seleccione un inquilino --</option>
+                    <option th:each="p : ${personas}"
+                            th:value="${p.id}"
+                            th:text="${p.nombreCompleto}"
+                            th:selected="${contrato.inquilino != null and contrato.inquilino.id == p.id}">
+                    </option>
+                </select>
+            </div>
+
+            <!-- Fechas y duracion -->
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="fechaInicio">Fecha de inicio <span class="requerido">*</span></label>
+                    <input type="date" id="fechaInicio" name="fechaInicio"
+                           class="form-control"
+                           th:value="${contrato.fechaInicio}" required/>
+                </div>
+
+                <div class="form-group">
+                    <label for="duracionMeses">Duracion (meses) <span class="requerido">*</span></label>
+                    <input type="number" id="duracionMeses" name="duracionMeses"
+                           class="form-control"
+                           th:value="${contrato.duracionMeses}"
+                           min="1" required/>
+                </div>
+            </div>
+
+            <!-- Importe y dia vencimiento -->
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="importeMensual">Importe mensual <span class="requerido">*</span></label>
+                    <input type="number" id="importeMensual" name="importeMensual"
+                           class="form-control"
+                           th:value="${contrato.importeMensual}"
+                           step="0.01" min="0.01" required/>
+                </div>
+
+                <div class="form-group">
+                    <label for="diaVencimientoMensual">Dia de vencimiento <span class="requerido">*</span></label>
+                    <input type="number" id="diaVencimientoMensual" name="diaVencimientoMensual"
+                           class="form-control"
+                           th:value="${contrato.diaVencimientoMensual}"
+                           min="1" max="31" required/>
+                </div>
+            </div>
+
+            <!-- Estado -->
+            <div class="form-group">
+                <label for="estado">Estado <span class="requerido">*</span></label>
+                <select id="estado" name="estado" class="form-control" required>
+                    <option th:each="e : ${estados}"
+                            th:value="${e.name()}"
+                            th:text="${e.descripcion}"
+                            th:selected="${contrato.estado == e}">
+                    </option>
+                </select>
+                <small class="form-hint" th:if="${accion == 'edicion'}">
+                    Transiciones: Borrador → Activo | Activo → Finalizado / Rescindido
+                </small>
+            </div>
+
+            <!-- Descripcion -->
+            <div class="form-group">
+                <label for="descripcion">Descripcion <span class="requerido">*</span></label>
+                <textarea id="descripcion" name="descripcion" class="form-control"
+                          rows="3" th:text="${contrato.descripcion}"
+                          placeholder="Descripcion del contrato..." required></textarea>
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary"
+                        th:text="${accion == 'alta' ? 'Crear Contrato' : 'Guardar Cambios'}">Guardar</button>
+                <a th:href="@{/contratos}" class="btn btn-outline">Cancelar</a>
+            </div>
+        </form>
+    </div>
+
+</main>
+
+<footer class="footer">
+    <p>Sistema de Gestion Inmobiliaria &mdash; DESI 2026 &mdash; UTN FRSF</p>
+</footer>
+
+</body>
+</html>
