@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title th:text="${titulo != null ? titulo + ' - Inmobiliaria' : 'Sistema Inmobiliaria'}">Inmobiliaria</title>
+    <link rel="stylesheet" th:href="@{/css/estilos.css}"/>
+</head>
+<body>
+
+<nav class="navbar">
+    <div class="navbar-brand">
+        <span>🏠 Inmobiliaria</span>
+    </div>
+    <ul class="navbar-menu">
+        <li><a th:href="@{/propiedades}">Propiedades</a></li>
+        <li><a th:href="@{/publicaciones}">Publicaciones</a></li>
+        <li><a th:href="@{/contratos}">Contratos</a></li>
+        <li><a th:href="@{/facturas}" class="active">Facturas</a></li>
+    </ul>
+</nav>
+
+<main class="container">
+    <th:block th:fragment="contenido"></th:block>
+</main>
+
+<footer class="footer">
+    <p>Sistema de Gestión Inmobiliaria &mdash; DESI 2026 &mdash; UTN FRSF</p>
+</footer>
+
+</body>
+</html>
