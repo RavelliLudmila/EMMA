@@ -301,3 +301,19 @@ footer.footer {
 .badge.activo     { background: #d1e7dd; color: #0a3622; }
 .badge.finalizado { background: #cff4fc; color: #055160; }
 .badge.rescindido { background: #f8d7da; color: #58151c; }
+
+/* Badges de estado de incidente */
+.badge.abierto     { background: #d1e7dd; color: #0a3622; }
+.badge.en-proceso  { background: #fef3cd; color: #856404; }
+.badge.resuelto    { background: #cff4fc; color: #055160; }
+.badge.cancelado   { background: var(--gray-200); color: var(--gray-500); }
+.badge.reabierto   { background: #f8d7da; color: #58151c; }
+
+/* Badges de prioridad */
+.badge.baja   { background: #d1e7dd; color: #0a3622; }
+.badge.media  { background: #fef3cd; color: #856404; }
+.badge.alta   { background: #f8d7da; color: #58151c; }
+
+.badge.pendiente  { background: #fef3cd; color: #856404; }
+.badge.realizada  { background: #d1e7dd; color: #0a3622; }
+.badge.cancelada  { background: var(--gray-200); color: var(--gray-500); }

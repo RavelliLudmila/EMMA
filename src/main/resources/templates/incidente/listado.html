@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Incidentes - Inmobiliaria</title>
+    <link rel="stylesheet" th:href="@{/css/estilos.css}"/>
+</head>
+<body>
+
+<nav class="navbar">
+    <div class="navbar-brand"><span>🏠 Inmobiliaria</span></div>
+    <ul class="navbar-menu">
+        <li><a th:href="@{/propiedades}">Propiedades</a></li>
+        <li><a th:href="@{/publicaciones}">Publicaciones</a></li>
+		<li><a th:href="@{/visitas}">Visitas</a></li>
+        <li><a th:href="@{/contratos}">Contratos</a></li>
+        <li><a th:href="@{/incidentes}" class="active">Incidentes</a></li>
+        <li><a th:href="@{/facturas}">Facturas</a></li>
+    </ul>
+</nav>
+
+<main class="container">
+
+    <div class="page-header">
+        <h1>Incidentes</h1>
+        <a th:href="@{/incidentes/nuevo}" class="btn btn-primary">+ Nuevo Incidente</a>
+    </div>
+
+    <div th:if="${mensajeExito}" class="alerta alerta-exito" th:text="${mensajeExito}"></div>
+    <div th:if="${mensajeError}" class="alerta alerta-error" th:text="${mensajeError}"></div>
+
+    <!-- Filtros -->
+    <div class="card filtros">
+        <h3>Filtrar</h3>
+        <form th:action="@{/incidentes}" method="get" class="form-filtros">
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Contrato</label>
+                    <select name="contratoId" class="form-control">
+                        <option value="">Todos</option>
+                        <option th:each="c : ${contratos}"
+                                th:value="${c.id}"
+                                th:text="${c.resumen}"
+                                th:selected="${filtroContratoId != null and filtroContratoId == c.id}">
+                        </option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Estado</label>
+                    <select name="estado" class="form-control">
+                        <option value="">Todos</option>
+                        <option th:each="e : ${estados}"
+                                th:value="${e.name()}"
+                                th:text="${e.descripcion}"
+                                th:selected="${filtroEstado != null and filtroEstado == e}">
+                        </option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Categoria</label>
+                    <select name="categoria" class="form-control">
+                        <option value="">Todas</option>
+                        <option th:each="c : ${categorias}"
+                                th:value="${c.name()}"
+                                th:text="${c.descripcion}"
+                                th:selected="${filtroCategoria != null and filtroCategoria == c}">
+                        </option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Prioridad</label>
+                    <select name="prioridad" class="form-control">
+                        <option value="">Todas</option>
+                        <option th:each="p : ${prioridades}"
+                                th:value="${p.name()}"
+                                th:text="${p.descripcion}"
+                                th:selected="${filtroPrioridad != null and filtroPrioridad == p}">
+                        </option>
+                    </select>
+                </div>
+
+                <div class="form-group form-group-actions">
+                    <button type="submit" class="btn btn-secondary">Filtrar</button>
+                    <a th:href="@{/incidentes}" class="btn btn-outline">Limpiar</a>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <!-- Tabla -->
+    <div class="card">
+        <table class="tabla" th:if="${not #lists.isEmpty(incidentes)}">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Titulo</th>
+                    <th>Contrato</th>
+                    <th>Categoria</th>
+                    <th>Prioridad</th>
+                    <th>Fecha alta</th>
+                    <th>Estado</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="i : ${incidentes}">
+                    <td th:text="${i.id}"></td>
+                    <td th:text="${i.titulo}"></td>
+                    <td th:text="${i.contrato.resumen}"></td>
+                    <td th:text="${i.categoria.descripcion}"></td>
+                    <td>
+                        <span class="badge" th:classappend="${i.prioridad.name().toLowerCase()}"
+                              th:text="${i.prioridad.descripcion}"></span>
+                    </td>
+                    <td th:text="${#temporals.format(i.fechaAlta, 'dd/MM/yyyy HH:mm')}"></td>
+                    <td>
+                        <span class="badge" th:classappend="${i.estado.name().toLowerCase().replace('_', '-')}"
+                              th:text="${i.estado.descripcion}"></span>
+                    </td>
+                    <td class="acciones">
+                        <a th:href="@{/incidentes/{id}/editar(id=${i.id})}"
+                           th:if="${i.estado.name() != 'CANCELADO'}"
+                           class="btn btn-sm btn-secondary">Editar</a>
+                        <form th:action="@{/incidentes/{id}/eliminar(id=${i.id})}"
+                              method="post" style="display:inline"
+                              onsubmit="return confirm('¿Eliminar este incidente?')">
+                            <button type="submit"
+                                    th:if="${i.estado.name() != 'EN_PROCESO'}"
+                                    class="btn btn-sm btn-danger">Eliminar</button>
+                        </form>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div th:if="${#lists.isEmpty(incidentes)}" class="sin-resultados">
+            <p>No se encontraron incidentes.</p>
+        </div>
+    </div>
+
+</main>
+
+<footer class="footer">
+    <p>Sistema de Gestion Inmobiliaria &mdash; DESI 2026 &mdash; UTN FRSF</p>
+</footer>
+
+</body>
+</html>
