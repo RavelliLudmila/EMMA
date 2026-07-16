@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Visitas - Inmobiliaria</title>
+    <link rel="stylesheet" th:href="@{/css/estilos.css}"/>
+</head>
+<body>
+
+<nav class="navbar">
+    <div class="navbar-brand"><span>🏠 Inmobiliaria</span></div>
+    <ul class="navbar-menu">
+        <li><a th:href="@{/propiedades}">Propiedades</a></li>
+        <li><a th:href="@{/publicaciones}">Publicaciones</a></li>
+        <li><a th:href="@{/visitas}" class="active">Visitas</a></li>
+        <li><a th:href="@{/contratos}">Contratos</a></li>
+        <li><a th:href="@{/incidentes}">Incidentes</a></li>
+        <li><a th:href="@{/facturas}">Facturas</a></li>
+    </ul>
+</nav>
+
+<main class="container">
+
+    <div class="page-header">
+        <h1>Visitas</h1>
+        <a th:href="@{/visitas/nueva}" class="btn btn-primary">+ Nueva Visita</a>
+    </div>
+
+    <div th:if="${mensajeExito}" class="alerta alerta-exito" th:text="${mensajeExito}"></div>
+    <div th:if="${mensajeError}" class="alerta alerta-error" th:text="${mensajeError}"></div>
+
+    <!-- Filtros -->
+    <div class="card filtros">
+        <h3>Filtrar</h3>
+        <form th:action="@{/visitas}" method="get" class="form-filtros">
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Publicacion</label>
+                    <select name="publicacionId" class="form-control">
+                        <option value="">Todas</option>
+                        <option th:each="p : ${publicaciones}"
+                                th:value="${p.id}"
+                                th:text="${'#' + p.id + ' - ' + p.propiedad.direccion}"
+                                th:selected="${filtroPublicacionId != null and filtroPublicacionId == p.id}">
+                        </option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Estado</label>
+                    <select name="estado" class="form-control">
+                        <option value="">Todos</option>
+                        <option th:each="e : ${estados}"
+                                th:value="${e.name()}"
+                                th:text="${e.descripcion}"
+                                th:selected="${filtroEstado != null and filtroEstado == e}">
+                        </option>
+                    </select>
+                </div>
+
+                <div class="form-group form-group-actions">
+                    <button type="submit" class="btn btn-secondary">Filtrar</button>
+                    <a th:href="@{/visitas}" class="btn btn-outline">Limpiar</a>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <!-- Tabla -->
+    <div class="card">
+        <table class="tabla" th:if="${not #lists.isEmpty(visitas)}">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Publicacion</th>
+                    <th>Propiedad</th>
+                    <th>Fecha y hora</th>
+                    <th>Estado</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="v : ${visitas}">
+                    <td th:text="${v.id}"></td>
+                    <td th:text="${'#' + v.publicacion.id}"></td>
+                    <td th:text="${v.publicacion.propiedad.direccion}"></td>
+                    <td th:text="${#temporals.format(v.fechaHora, 'dd/MM/yyyy HH:mm')}"></td>
+                    <td>
+                        <span class="badge"
+                              th:classappend="${v.estado.name().toLowerCase()}"
+                              th:text="${v.estado.descripcion}">
+                        </span>
+                    </td>
+                    <td class="acciones">
+                        <a th:href="@{/visitas/{id}/editar(id=${v.id})}"
+                           th:if="${v.estado.name() != 'REALIZADA' and v.estado.name() != 'CANCELADA'}"
+                           class="btn btn-sm btn-secondary">Editar</a>
+                        <form th:action="@{/visitas/{id}/eliminar(id=${v.id})}"
+                              method="post" style="display:inline"
+                              onsubmit="return confirm('¿Eliminar esta visita?')">
+                            <button type="submit"
+                                    th:if="${v.estado.name() != 'REALIZADA'}"
+                                    class="btn btn-sm btn-danger">Eliminar</button>
+                        </form>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div th:if="${#lists.isEmpty(visitas)}" class="sin-resultados">
+            <p>No se encontraron visitas.</p>
+        </div>
+    </div>
+
+</main>
+
+<footer class="footer">
+    <p>Sistema de Gestion Inmobiliaria &mdash; DESI 2026 &mdash; UTN FRSF</p>
+</footer>
+
+</body>
+</html>

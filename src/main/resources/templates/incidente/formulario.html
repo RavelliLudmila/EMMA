@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title th:text="${accion == 'alta' ? 'Nuevo Incidente' : 'Editar Incidente'} + ' - Inmobiliaria'">Incidente</title>
+    <link rel="stylesheet" th:href="@{/css/estilos.css}"/>
+</head>
+<body>
+
+<nav class="navbar">
+    <div class="navbar-brand"><span>🏠 Inmobiliaria</span></div>
+    <ul class="navbar-menu">
+        <li><a th:href="@{/propiedades}">Propiedades</a></li>
+        <li><a th:href="@{/publicaciones}">Publicaciones</a></li>
+		<li><a th:href="@{/visitas}">Visitas</a></li>
+        <li><a th:href="@{/contratos}">Contratos</a></li>
+        <li><a th:href="@{/incidentes}" class="active">Incidentes</a></li>
+        <li><a th:href="@{/facturas}">Facturas</a></li>
+    </ul>
+</nav>
+
+<main class="container">
+
+    <div class="page-header">
+        <h1 th:text="${accion == 'alta' ? 'Nuevo Incidente' : 'Editar Incidente #' + incidente.id}">Incidente</h1>
+        <a th:href="@{/incidentes}" class="btn btn-outline">← Volver al listado</a>
+    </div>
+
+    <div th:if="${mensajeExito}" class="alerta alerta-exito" th:text="${mensajeExito}"></div>
+    <div th:if="${mensajeError}" class="alerta alerta-error" th:text="${mensajeError}"></div>
+
+    <div class="card">
+        <form th:action="${accion == 'alta' ? '/incidentes/nuevo' : '/incidentes/' + incidente.id + '/editar'}"
+              method="post">
+
+            <!-- ID solo lectura en edicion -->
+            <div class="form-group" th:if="${accion == 'edicion'}">
+                <label>ID Incidente</label>
+                <input type="text" class="form-control" th:value="${incidente.id}" readonly/>
+            </div>
+
+            <!-- Contrato -->
+            <div class="form-group">
+                <label for="contratoId">Contrato <span class="requerido">*</span></label>
+                <select id="contratoId" name="contratoId" class="form-control" required
+                        th:disabled="${accion == 'edicion'}">
+                    <option value="">-- Seleccione un contrato --</option>
+                    <option th:each="c : ${contratos}"
+                            th:value="${c.id}"
+                            th:text="${c.resumen}"
+                            th:selected="${incidente.contrato != null and incidente.contrato.id == c.id}">
+                    </option>
+                </select>
+                <!-- Campo hidden para edicion ya que el select está disabled -->
+                <input type="hidden" name="contratoId"
+                       th:if="${accion == 'edicion'}"
+                       th:value="${incidente.contrato != null ? incidente.contrato.id : ''}"/>
+            </div>
+
+            <!-- Titulo -->
+            <div class="form-group">
+                <label for="titulo">Titulo <span class="requerido">*</span></label>
+                <input type="text" id="titulo" name="titulo" class="form-control"
+                       th:value="${incidente.titulo}"
+                       placeholder="Titulo del incidente" required/>
+            </div>
+
+            <!-- Descripcion -->
+            <div class="form-group">
+                <label for="descripcion">Descripcion <span class="requerido">*</span></label>
+                <textarea id="descripcion" name="descripcion" class="form-control"
+                          rows="3" th:text="${incidente.descripcion}"
+                          placeholder="Descripcion detallada del incidente..." required></textarea>
+            </div>
+
+            <!-- Categoria y Prioridad -->
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="categoria">Categoria <span class="requerido">*</span></label>
+                    <select id="categoria" name="categoria" class="form-control" required>
+                        <option value="">-- Seleccione --</option>
+                        <option th:each="c : ${categorias}"
+                                th:value="${c.name()}"
+                                th:text="${c.descripcion}"
+                                th:selected="${incidente.categoria == c}">
+                        </option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="prioridad">Prioridad <span class="requerido">*</span></label>
+                    <select id="prioridad" name="prioridad" class="form-control" required>
+                        <option value="">-- Seleccione --</option>
+                        <option th:each="p : ${prioridades}"
+                                th:value="${p.name()}"
+                                th:text="${p.descripcion}"
+                                th:selected="${incidente.prioridad == p}">
+                        </option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Estado (solo en edicion) -->
+            <div class="form-group" th:if="${accion == 'edicion'}">
+                <label for="estado">Estado <span class="requerido">*</span></label>
+                <select id="estado" name="estado" class="form-control" required>
+                    <option th:each="e : ${estados}"
+                            th:value="${e.name()}"
+                            th:text="${e.descripcion}"
+                            th:selected="${incidente.estado == e}">
+                    </option>
+                </select>
+            </div>
+
+            <!-- Responsable tecnico -->
+            <div class="form-group">
+                <label for="responsableTecnico">Responsable tecnico</label>
+                <input type="text" id="responsableTecnico" name="responsableTecnico"
+                       class="form-control"
+                       th:value="${incidente.responsableTecnico}"
+                       placeholder="Nombre del tecnico responsable"/>
+            </div>
+
+            <!-- Observaciones y costo (solo en edicion) -->
+            <div th:if="${accion == 'edicion'}">
+                <div class="form-group">
+                    <label for="observacionesResolucion">Observaciones de resolucion</label>
+                    <textarea id="observacionesResolucion" name="observacionesResolucion"
+                              class="form-control" rows="3"
+                              th:text="${incidente.observacionesResolucion}"
+                              placeholder="Observaciones sobre la resolucion..."></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="costoResolucion">Costo de resolucion</label>
+                    <input type="number" id="costoResolucion" name="costoResolucion"
+                           class="form-control"
+                           th:value="${incidente.costoResolucion}"
+                           step="0.01" min="0"/>
+                </div>
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary"
+                        th:text="${accion == 'alta' ? 'Registrar Incidente' : 'Guardar Cambios'}">Guardar</button>
+                <a th:href="@{/incidentes}" class="btn btn-outline">Cancelar</a>
+            </div>
+        </form>
+    </div>
+
+</main>
+
+<footer class="footer">
+    <p>Sistema de Gestion Inmobiliaria &mdash; DESI 2026 &mdash; UTN FRSF</p>
+</footer>
+
+</body>
+</html>

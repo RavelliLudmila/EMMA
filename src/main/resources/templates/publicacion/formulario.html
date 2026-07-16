@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title th:text="${accion == 'alta' ? 'Nueva Publicacion' : 'Editar Publicacion'} + ' - Inmobiliaria'">Publicacion</title>
+    <link rel="stylesheet" th:href="@{/css/estilos.css}"/>
+</head>
+<body>
+
+<nav class="navbar">
+    <div class="navbar-brand"><span>🏠 Inmobiliaria</span></div>
+    <ul class="navbar-menu">
+        <li><a th:href="@{/propiedades}">Propiedades</a></li>
+        <li><a th:href="@{/publicaciones}" class="active">Publicaciones</a></li>
+		<li><a th:href="@{/visitas}">Visitas</a></li>
+        <li><a th:href="@{/contratos}">Contratos</a></li>
+		<li><a th:href="@{/incidentes}">Incidentes</a></li>
+        <li><a th:href="@{/facturas}">Facturas</a></li>
+    </ul>
+</nav>
+
+<main class="container">
+
+    <div class="page-header">
+        <h1 th:text="${accion == 'alta' ? 'Nueva Publicacion' : 'Editar Publicacion #' + publicacion.id}">Publicacion</h1>
+        <a th:href="@{/publicaciones}" class="btn btn-outline">← Volver al listado</a>
+    </div>
+
+    <div th:if="${mensajeExito}" class="alerta alerta-exito" th:text="${mensajeExito}"></div>
+    <div th:if="${mensajeError}" class="alerta alerta-error" th:text="${mensajeError}"></div>
+
+    <div class="card">
+        <form th:action="${accion == 'alta' ? '/publicaciones/nueva' : '/publicaciones/' + publicacion.id + '/editar'}"
+              method="post">
+
+            <!-- ID solo lectura en edicion -->
+            <div class="form-group" th:if="${accion == 'edicion'}">
+                <label>ID Publicacion</label>
+                <input type="text" class="form-control" th:value="${publicacion.id}" readonly/>
+            </div>
+
+            <!-- Propiedad -->
+            <div class="form-group" th:if="${accion == 'alta'}">
+                <label for="propiedadId">Propiedad <span class="requerido">*</span></label>
+                <select id="propiedadId" name="propiedadId" class="form-control" required>
+                    <option value="">-- Seleccione una propiedad disponible --</option>
+                    <option th:each="p : ${propiedades}"
+                            th:value="${p.id}"
+                            th:text="${p.resumen + ' (' + p.estadoDisponibilidad.name() + ')'}"
+                            th:selected="${publicacion.propiedad != null and publicacion.propiedad.id == p.id}">
+                    </option>
+                </select>
+            </div>
+
+            <div class="form-group" th:if="${accion == 'edicion'}">
+                <label>Propiedad</label>
+                <input type="text" class="form-control"
+                       th:value="${publicacion.propiedad.resumen}" readonly/>
+            </div>
+
+            <!-- Precio mensual -->
+            <div class="form-group">
+                <label for="precioMensual">Precio mensual <span class="requerido">*</span></label>
+                <input type="number" id="precioMensual" name="precioMensual"
+                       class="form-control"
+                       th:value="${publicacion.precioMensual}"
+                       step="0.01" min="0.01" required/>
+            </div>
+
+            <!-- Estado (solo en edicion) -->
+            <div class="form-group" th:if="${accion == 'edicion'}">
+                <label for="estadoPublicacion">Estado <span class="requerido">*</span></label>
+                <select id="estadoPublicacion" name="estadoPublicacion" class="form-control" required>
+                    <option th:each="e : ${estados}"
+                            th:value="${e.name()}"
+                            th:text="${e.descripcion}"
+                            th:selected="${publicacion.estadoPublicacion == e}">
+                    </option>
+                </select>
+            </div>
+
+            <!-- Condiciones -->
+            <div class="form-group">
+                <label for="condiciones">Condiciones de alquiler <span class="requerido">*</span></label>
+                <textarea id="condiciones" name="condiciones" class="form-control"
+                          rows="3" th:text="${publicacion.condiciones}"
+                          placeholder="Deposito, garantia, mascotas, etc."></textarea>
+            </div>
+
+            <!-- Descripcion -->
+            <div class="form-group">
+                <label for="descripcion">Descripcion <span class="requerido">*</span></label>
+                <textarea id="descripcion" name="descripcion" class="form-control"
+                          rows="3" th:text="${publicacion.descripcion}"
+                          placeholder="Descripcion de la propiedad..."></textarea>
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary"
+                        th:text="${accion == 'alta' ? 'Crear Publicacion' : 'Guardar Cambios'}">Guardar</button>
+                <a th:href="@{/publicaciones}" class="btn btn-outline">Cancelar</a>
+            </div>
+        </form>
+    </div>
+
+</main>
+
+<footer class="footer">
+    <p>Sistema de Gestion Inmobiliaria &mdash; DESI 2026 &mdash; UTN FRSF</p>
+</footer>
+
+</body>
+</html>

@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Propiedades - Inmobiliaria</title>
+    <link rel="stylesheet" th:href="@{/css/estilos.css}"/>
+</head>
+<body>
+
+<nav class="navbar">
+    <div class="navbar-brand"><span>🏠 Inmobiliaria</span></div>
+    <ul class="navbar-menu">
+        <li><a th:href="@{/propiedades}" class="active">Propiedades</a></li>
+        <li><a th:href="@{/publicaciones}">Publicaciones</a></li>
+		<li><a th:href="@{/visitas}">Visitas</a></li>
+        <li><a th:href="@{/contratos}">Contratos</a></li>
+		<li><a th:href="@{/incidentes}">Incidentes</a></li>
+        <li><a th:href="@{/facturas}">Facturas</a></li>
+    </ul>
+</nav>
+
+<main class="container">
+
+    <div class="page-header">
+        <h1>Propiedades</h1>
+        <a th:href="@{/propiedades/nueva}" class="btn btn-primary">+ Nueva Propiedad</a>
+    </div>
+
+    <div th:if="${mensajeExito}" class="alerta alerta-exito" th:text="${mensajeExito}"></div>
+    <div th:if="${mensajeError}" class="alerta alerta-error" th:text="${mensajeError}"></div>
+
+    <!-- Filtros -->
+    <div class="card filtros">
+        <h3>Filtrar</h3>
+        <form th:action="@{/propiedades}" method="get" class="form-filtros">
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Dirección</label>
+                    <input type="text" name="direccion" class="form-control"
+                           th:value="${filtroDireccion}" placeholder="Buscar por dirección..."/>
+                </div>
+
+                <div class="form-group">
+                    <label>Ciudad</label>
+                    <select name="ciudadId" class="form-control">
+                        <option value="">Todas</option>
+                        <option th:each="c : ${ciudades}"
+                                th:value="${c.id}"
+                                th:text="${c.nombreCompleto}"
+                                th:selected="${filtroCiudadId != null and filtroCiudadId == c.id}">
+                        </option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Tipo</label>
+                    <select name="tipo" class="form-control">
+                        <option value="">Todos</option>
+                        <option th:each="t : ${tipos}"
+                                th:value="${t.name()}"
+                                th:text="${t.name()}"
+                                th:selected="${filtroTipo != null and filtroTipo == t}">
+                        </option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Estado</label>
+                    <select name="estado" class="form-control">
+                        <option value="">Todos</option>
+                        <option th:each="e : ${estados}"
+                                th:value="${e.name()}"
+                                th:text="${e.name()}"
+                                th:selected="${filtroEstado != null and filtroEstado == e}">
+                        </option>
+                    </select>
+                </div>
+
+                <div class="form-group form-group-actions">
+                    <button type="submit" class="btn btn-secondary">Filtrar</button>
+                    <a th:href="@{/propiedades}" class="btn btn-outline">Limpiar</a>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <!-- Tabla -->
+    <div class="card">
+        <table class="tabla" th:if="${not #lists.isEmpty(propiedades)}">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Dirección</th>
+                    <th>Ciudad</th>
+                    <th>Tipo</th>
+                    <th>Ambientes</th>
+                    <th>M²</th>
+                    <th>Estado</th>
+                    <th>Propietario</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="p : ${propiedades}">
+                    <td th:text="${p.id}"></td>
+                    <td th:text="${p.direccion}"></td>
+                    <td th:text="${p.ciudad != null ? p.ciudad.nombreCompleto : ''}"></td>
+                    <td th:text="${p.tipo}"></td>
+                    <td th:text="${p.cantidadAmbientes}"></td>
+                    <td th:text="${p.metrosCuadrados}"></td>
+                    <td>
+                        <span class="badge"
+                              th:classappend="${p.estadoDisponibilidad.name().toLowerCase()}"
+                              th:text="${p.estadoDisponibilidad.name()}">
+                        </span>
+                    </td>
+                    <td th:text="${p.propietario != null ? p.propietario.nombreCompleto : ''}"></td>
+                    <td class="acciones">
+                        <a th:href="@{/propiedades/{id}/editar(id=${p.id})}"
+                           class="btn btn-sm btn-secondary">Editar</a>
+                        <form th:action="@{/propiedades/{id}/eliminar(id=${p.id})}"
+                              method="post" style="display:inline"
+                              onsubmit="return confirm('¿Eliminar esta propiedad?')">
+                            <button type="submit" class="btn btn-sm btn-danger">Eliminar</button>
+                        </form>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div th:if="${#lists.isEmpty(propiedades)}" class="sin-resultados">
+            <p>No se encontraron propiedades.</p>
+        </div>
+    </div>
+
+</main>
+
+<footer class="footer">
+    <p>Sistema de Gestión Inmobiliaria &mdash; DESI 2026 &mdash; UTN FRSF</p>
+</footer>
+
+</body>
+</html>

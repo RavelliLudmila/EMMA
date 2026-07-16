@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Contratos - Inmobiliaria</title>
+    <link rel="stylesheet" th:href="@{/css/estilos.css}"/>
+</head>
+<body>
+
+<nav class="navbar">
+    <div class="navbar-brand"><span>🏠 Inmobiliaria</span></div>
+    <ul class="navbar-menu">
+        <li><a th:href="@{/propiedades}">Propiedades</a></li>
+        <li><a th:href="@{/publicaciones}">Publicaciones</a></li>
+		<li><a th:href="@{/visitas}">Visitas</a></li>
+        <li><a th:href="@{/contratos}" class="active">Contratos</a></li>
+		<li><a th:href="@{/incidentes}">Incidentes</a></li>
+        <li><a th:href="@{/facturas}">Facturas</a></li>
+    </ul>
+</nav>
+
+<main class="container">
+
+    <div class="page-header">
+        <h1>Contratos</h1>
+        <a th:href="@{/contratos/nuevo}" class="btn btn-primary">+ Nuevo Contrato</a>
+    </div>
+
+    <div th:if="${mensajeExito}" class="alerta alerta-exito" th:text="${mensajeExito}"></div>
+    <div th:if="${mensajeError}" class="alerta alerta-error" th:text="${mensajeError}"></div>
+
+    <!-- Filtros -->
+    <div class="card filtros">
+        <h3>Filtrar</h3>
+        <form th:action="@{/contratos}" method="get" class="form-filtros">
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Propiedad</label>
+                    <select name="propiedadId" class="form-control">
+                        <option value="">Todas</option>
+                        <option th:each="p : ${propiedades}"
+                                th:value="${p.id}"
+                                th:text="${p.resumen}"
+                                th:selected="${filtroPropiedadId != null and filtroPropiedadId == p.id}">
+                        </option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Inquilino</label>
+                    <select name="inquilinoId" class="form-control">
+                        <option value="">Todos</option>
+                        <option th:each="p : ${personas}"
+                                th:value="${p.id}"
+                                th:text="${p.nombreCompleto}"
+                                th:selected="${filtroInquilinoId != null and filtroInquilinoId == p.id}">
+                        </option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Estado</label>
+                    <select name="estado" class="form-control">
+                        <option value="">Todos</option>
+                        <option th:each="e : ${estados}"
+                                th:value="${e.name()}"
+                                th:text="${e.descripcion}"
+                                th:selected="${filtroEstado != null and filtroEstado == e}">
+                        </option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Fecha inicio</label>
+                    <input type="date" name="fechaInicio" class="form-control"
+                           th:value="${filtroFechaInicio}"/>
+                </div>
+
+                <div class="form-group form-group-actions">
+                    <button type="submit" class="btn btn-secondary">Filtrar</button>
+                    <a th:href="@{/contratos}" class="btn btn-outline">Limpiar</a>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <!-- Tabla -->
+    <div class="card">
+        <table class="tabla" th:if="${not #lists.isEmpty(contratos)}">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Propiedad</th>
+                    <th>Propietario</th>
+                    <th>Inquilino</th>
+                    <th>Fecha inicio</th>
+                    <th>Importe mensual</th>
+                    <th>Dia venc.</th>
+                    <th>Estado</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="c : ${contratos}">
+                    <td th:text="${c.id}"></td>
+                    <td th:text="${c.propiedad.resumen}"></td>
+                    <td th:text="${c.propiedad.propietario != null ? c.propiedad.propietario.nombreCompleto : '-'}"></td>
+                    <td th:text="${c.inquilino.nombreCompleto}"></td>
+                    <td th:text="${#temporals.format(c.fechaInicio, 'dd/MM/yyyy')}"></td>
+                    <td th:text="${'$' + #numbers.formatDecimal(c.importeMensual, 1, 'COMMA', 2, 'POINT')}"></td>
+                    <td th:text="${c.diaVencimientoMensual}"></td>
+                    <td>
+                        <span class="badge"
+                              th:classappend="${c.estado.name().toLowerCase()}"
+                              th:text="${c.estado.descripcion}">
+                        </span>
+                    </td>
+                    <td class="acciones">
+                        <a th:href="@{/contratos/{id}/editar(id=${c.id})}"
+                           th:if="${c.estado.name() != 'FINALIZADO' and c.estado.name() != 'RESCINDIDO'}"
+                           class="btn btn-sm btn-secondary">Editar</a>
+                        <form th:action="@{/contratos/{id}/eliminar(id=${c.id})}"
+                              method="post" style="display:inline"
+                              onsubmit="return confirm('¿Eliminar este contrato?')">
+                            <button type="submit"
+                                    th:if="${c.estado.name() == 'BORRADOR'}"
+                                    class="btn btn-sm btn-danger">Eliminar</button>
+                        </form>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div th:if="${#lists.isEmpty(contratos)}" class="sin-resultados">
+            <p>No se encontraron contratos.</p>
+        </div>
+    </div>
+
+</main>
+
+<footer class="footer">
+    <p>Sistema de Gestion Inmobiliaria &mdash; DESI 2026 &mdash; UTN FRSF</p>
+</footer>
+
+</body>
+</html>
